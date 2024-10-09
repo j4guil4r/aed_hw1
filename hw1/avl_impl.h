@@ -70,6 +70,37 @@ AVLNode<T>* AVLTree<T>::minValueNode(AVLNode<T>* node) {
   return nodo_aux;
 }
 
+//Agregado: rebalanceador
+template <typename T>
+AVLNode<T>* AVLTree<T>::rebalance(AVLNode<T>* node) {
+  if(node == nullptr){return node;}
+  
+  node->height = 1 + std::max(height(node->left), height(node->right));
+  
+  int balance = getBalance(node);
+
+  // Rotación derecha simple
+  if(balance > 1 && getBalance(node->left) >= 0){return rightRotate(node);}
+
+  // Rotación izquierda-derecha
+  if(balance > 1 && getBalance(node->left) < 0){
+    node->left = leftRotate(node->left);
+    return rightRotate(node);
+  }
+
+  // Rotación izquierda simple
+  if(balance < -1 && getBalance(node->right) <= 0){return leftRotate(node);}
+
+  // Rotación derecha-izquierda
+  if(balance < -1 && getBalance(node->right) > 0){
+    node->right = rightRotate(node->right);
+    return leftRotate(node);
+  }
+  
+  return node;
+}
+
+
 // Inserción
 template <typename T>
 AVLNode<T>* AVLTree<T>::insert(AVLNode<T>* node, T key) {
@@ -79,33 +110,41 @@ AVLNode<T>* AVLTree<T>::insert(AVLNode<T>* node, T key) {
   if(key < node->data){node->left = insert(node->left, key);}
   else if(key > node->data){node->right = insert(node->right, key);}
   else{return node;}
-  
-  node->height = 1 + std::max(height(node->left), height(node->right));
 
-  int bal = getBalance(node);
-
-  if(bal > 1 && key < node->left->data){
-    return rightRotate(node);
-  }
-  if(bal < -1 && key > node->right->data){
-    return leftRotate(node);
-  }
-  if(bal > 1 && key > node->left->data){
-    node->left = leftRotate(node->left);
-    return rightRotate(node);
-  }
-  if(bal < -1 && key < node->right->data){
-    node->right = rightRotate(node->right);
-    return leftRotate(node);
-  }
-
-  return node;
+  return rebalance(node);
 }
 
 // Eliminar un nodo
 template <typename T>
 AVLNode<T>* AVLTree<T>::remove(AVLNode<T>* root, T key) {
   // COMPLETE HERE
+  if(root == nullptr){return root;}
+
+  if(key < root->data){root->left = remove(root->left, key);}
+  else if(key > root->data){root->right = remove(root->right, key);}
+  else{
+    // Caso con un hijo o sin hijos
+    if(root->left == nullptr || root->right == nullptr){
+      AVLNode<T>* temp = root->left ? root->left : root->right;
+      if(temp == nullptr){
+        delete root;
+        root = nullptr;
+      } 
+      else{
+        AVLNode<T>* toDelete = root;
+        root = temp;
+        delete toDelete;
+      }
+    } 
+    else{
+      // Caso con dos hijos
+      AVLNode<T>* temp = minValueNode(root->right);
+      root->data = temp->data;
+      root->right = remove(root->right, temp->data);
+    }
+  }
+  if(root == nullptr){return root;}
+  return rebalance(root);
 }
 
 // Búsqueda
@@ -166,6 +205,7 @@ void AVLTree<T>::insert(T key) {
 template <typename T>
 void AVLTree<T>::remove(T key) {
   // COMPLETE HERE
+  root = remove(root, key);
 }
 
 template <typename T>

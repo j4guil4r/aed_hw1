@@ -48,6 +48,7 @@ class AVLTree {
   void postorder(AVLNode<T>* root, std::vector<T>& ret);
   //Agregado:
   bool isBalanced(AVLNode<T>* root);
+  AVLNode<T>* rebalance(AVLNode<T>* node); 
 
  public:
   AVLTree();
