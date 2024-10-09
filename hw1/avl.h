@@ -46,6 +46,8 @@ class AVLTree {
   void preorder(AVLNode<T>* root, std::vector<T>& ret);
   void inorder(AVLNode<T>* root, std::vector<T>& ret);
   void postorder(AVLNode<T>* root, std::vector<T>& ret);
+  //Agregado:
+  bool isBalanced(AVLNode<T>* root);
 
  public:
   AVLTree();
